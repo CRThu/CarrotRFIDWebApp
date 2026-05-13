@@ -1,0 +1,16 @@
+[project]
+name = "carrotrfidwebapp"
+version = "0.1.0"
+description = "Carrot RFID Web App Sidecar Console"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "carrotrfidtester",
+    "fastapi",
+    "loguru",
+    "pyserial",
+    "uvicorn",
+]
+
+[tool.uv.sources]
+carrotrfidtester = { workspace = true }
