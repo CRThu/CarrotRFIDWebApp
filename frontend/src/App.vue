@@ -82,11 +82,11 @@
               <h2 class="text-sm font-bold opacity-80 uppercase tracking-wider">Target Info</h2>
             </div>
           </div>
-          <div class="p-5 flex flex-col items-center gap-4">
+          <div class="p-4 flex flex-col items-center gap-2">
             <div class="relative">
-              <div class="w-24 h-24 rounded-full border-4 flex items-center justify-center transition-all duration-500"
+              <div class="w-20 h-20 rounded-full border-4 flex items-center justify-center transition-all duration-500"
                    :class="target.uid ? 'border-success bg-success/5 shadow-[0_0_20px_rgba(54,211,153,0.2)]' : 'border-base-300 opacity-20'">
-                <CreditCardIcon :size="40" :class="target.uid ? 'text-success' : 'text-base-content'" />
+                <CreditCardIcon :size="32" :class="target.uid ? 'text-success' : 'text-base-content'" />
               </div>
               <div v-if="target.uid" class="absolute -bottom-1 -right-1 badge badge-success badge-sm shadow-md border-base-100">DETECTED</div>
             </div>
@@ -124,11 +124,11 @@
       <section class="flex-1 flex flex-col gap-2 min-w-0">
         <!-- 3. Library & Workbench -->
         <div class="card bg-base-100 shadow-xl border border-base-200 flex-1 overflow-hidden flex flex-col">
-          <div class="p-2 border-b border-base-200 bg-base-200/50 flex items-center gap-1 overflow-x-auto no-scrollbar">
+          <div class="p-1.5 border-b border-base-200 bg-base-200/50 flex items-center gap-1 overflow-x-auto no-scrollbar">
             <button 
               v-for="cat in categories" 
               :key="cat"
-              class="btn btn-sm"
+              class="btn btn-xs"
               :class="activeCategory === cat ? 'btn-primary' : 'btn-ghost opacity-60'"
               @click="activeCategory = cat"
             >
@@ -137,11 +137,11 @@
           </div>
           
           <div class="flex-1 overflow-y-auto p-4">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
               <div 
                 v-for="item in presets" 
                 :key="item.name"
-                class="group p-3 bg-base-200 hover:bg-primary/5 border border-base-300 hover:border-primary/30 rounded-xl cursor-pointer transition-all active:scale-95 flex flex-col gap-1"
+                class="group p-2.5 bg-base-200 hover:bg-primary/5 border border-base-300 hover:border-primary/30 rounded-xl cursor-pointer transition-all active:scale-95 flex flex-col gap-0.5"
                 @click="injectPreset(item)"
               >
                 <div class="flex justify-between items-start">
@@ -149,7 +149,7 @@
                   <ArrowUpRightIcon :size="12" class="opacity-0 group-hover:opacity-40 transition-opacity" />
                 </div>
                 <span class="text-[10px] opacity-40 line-clamp-1 italic">{{ item.desc }}</span>
-                <div class="mt-2 font-mono text-[9px] opacity-30 group-hover:opacity-100 transition-opacity truncate bg-black/20 px-1.5 py-0.5 rounded">
+                <div class="mt-1.5 font-mono text-[9px] opacity-30 group-hover:opacity-100 transition-opacity truncate bg-black/20 px-1.5 py-0.5 rounded">
                   {{ item.hex }}
                 </div>
               </div>
@@ -157,7 +157,7 @@
           </div>
 
           <!-- Command Debugger / Editor -->
-          <div class="p-6 bg-base-200/50 border-t border-base-200">
+          <div class="p-4 bg-base-200/50 border-t border-base-200">
             <div class="flex items-center justify-between mb-3">
               <h3 class="text-xs font-bold uppercase tracking-widest opacity-50 flex items-center gap-2">
                 <TerminalIcon :size="14" /> Command Editor
@@ -181,14 +181,14 @@
                   <textarea 
                     v-model="cmdHex" 
                     placeholder="Enter High-Level Hex Command (e.g. 30 04)" 
-                    class="textarea textarea-bordered w-full font-mono text-sm leading-relaxed bg-neutral h-24 focus:border-primary transition-colors shadow-inner no-scrollbar"
+                    class="textarea textarea-bordered w-full font-mono text-xs leading-relaxed bg-neutral h-20 focus:border-primary transition-colors shadow-inner no-scrollbar"
                     @keydown.ctrl.enter="sendCmd"
                   ></textarea>
                   <div class="absolute bottom-2 right-2 text-[10px] opacity-20 pointer-events-none group-hover:opacity-40 transition-opacity">Ctrl + Enter to send</div>
                 </div>
               </div>
               <button 
-                class="btn btn-primary btn-lg px-8 h-24 flex flex-col gap-1 shadow-lg shadow-primary/20" 
+                class="btn btn-primary btn-lg px-8 h-20 flex flex-col gap-1 shadow-lg shadow-primary/20" 
                 :disabled="!isConnected || loading.send"
                 @click="sendCmd"
               >
@@ -202,7 +202,7 @@
       </section>
 
       <!-- Right: Monitor Panel -->
-      <aside class="w-80 flex flex-col gap-2">
+      <aside class="w-96 flex flex-col gap-2">
         <div class="card bg-base-100 shadow-xl border border-base-200 flex-1 overflow-hidden flex flex-col">
           <div class="tabs tabs-boxed bg-base-200/50 rounded-none border-b border-base-200 p-1">
             <button 
@@ -237,11 +237,13 @@
               </div>
               <button class="btn btn-ghost btn-xs text-[10px]" @click="clearLogs">CLEAR</button>
             </div>
-            <div class="flex-1 overflow-y-auto p-4 mockup-code bg-black/40 text-neutral-content rounded-none m-0 text-[10px] leading-relaxed scroll-smooth" ref="logViewport">
-              <pre v-for="(log, index) in filteredLogs" :key="index" :data-prefix="'>'" :class="levelTextClass(log.level)" class="hover:bg-white/5 transition-colors cursor-default">
-                <code><span class="opacity-30">{{ formatTime(log.timestamp) }}</span> <span class="font-bold">[{{ log.level }}]</span> {{ log.message }}</code>
-              </pre>
-              <div v-if="filteredLogs.length === 0" class="text-center opacity-10 mt-20 italic select-none">LISTENING FOR DATA...</div>
+            <div class="flex-1 overflow-y-auto p-3 font-mono bg-black/40 text-neutral-content rounded-none m-0 text-[10px] leading-relaxed scroll-smooth" ref="logViewport">
+              <div v-for="(log, index) in filteredLogs" :key="index" :class="levelTextClass(log.level)" class="hover:bg-white/5 transition-colors cursor-default py-0.5 border-b border-white/5 last:border-0 flex gap-2">
+                <span class="opacity-30 shrink-0 select-none">{{ formatTime(log.timestamp) }}</span>
+                <span class="font-bold shrink-0 select-none">[{{ log.level }}]</span>
+                <span class="break-all whitespace-pre-wrap">{{ log.message }}</span>
+              </div>
+              <div v-if="filteredLogs.length === 0" class="text-center opacity-10 mt-20 italic select-none uppercase tracking-widest">Listening for data...</div>
             </div>
           </div>
 
