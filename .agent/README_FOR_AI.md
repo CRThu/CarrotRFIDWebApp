@@ -21,17 +21,16 @@
 ## 代码实现概要 (Implementation Summary)
 
 ### 后端 (Backend Implementation)
-- **硬件管理 (`HardwareManager`)**:
-  - 实现为全局单例 `hw`。
-  - 使用 `asyncio.Lock` 包装同步的串口调用，确保 Web 端并发指令时的原子性。
-  - `lifespan` 钩子负责在服务启动时初始化 `PN532_HSU` 实例。
-- **日志管道 (`LogQueue`)**:
-  - 利用 `loguru` 的 `add` 方法注册自定义 Sink。
-  - 通过 `asyncio.Queue` 实现日志生产者与 WebSocket 消费者的解耦。
-- **关键端点**:
-  - `GET /api/status`: 返回硬件初始化状态。
-  - `POST /api/cmd`: 接收 `hex` 指令，校验通过后由 `hw.lock` 保护执行。
-  - `WS /ws/logs`: 实时推送 JSON 格式的日志项（含 level, message, timestamp）。
+- **架构分层**:
+  - **`api` 层**: 提供 RESTful 端点和 WebSocket 服务。
+    - `hardware.py`: 提供 `/api/hardware/connect`, `/api/hardware/disconnect`, `/api/hardware/status`，支持动态选择物理信道与波特率。
+    - `command.py`: 提供 `/api/cmd/transceive` 接收透传指令，通过调用 `PN532_HSU` 的 `transceive` 实现标准透传。
+    - `logs.py`: 提供 `/ws/logs` 实时日志推送。
+  - **`service` 层**: 核心业务与硬件控制。
+    - `hardware.py`: `HardwareManager` 硬件管理单例，控制 `SerialTransport` 与 `PN532_HSU` 的生命周期，确保 Web 端并发指令时的原子性。
+    - `logs.py`: 日志队列管道，集成 loguru 转发前端。
+- **动态控制**:
+  - 不在 `lifespan` 内硬编码连接逻辑，完全由客户端发起 `connect` 控制，支持从前端自由选择波特率和读卡器。
 
 ### 前端 (Frontend Implementation)
 - **响应式状态**:
