@@ -136,21 +136,36 @@
             </button>
           </div>
           
-          <div class="flex-1 overflow-y-auto p-4">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+          <div class="flex-1 overflow-y-auto p-2">
+            <div class="flex flex-col gap-1">
               <div 
                 v-for="item in presets" 
                 :key="item.name"
-                class="group p-2.5 bg-base-200 hover:bg-primary/5 border border-base-300 hover:border-primary/30 rounded-xl cursor-pointer transition-all active:scale-95 flex flex-col gap-0.5"
+                class="group flex items-center gap-3 p-2 bg-base-200/40 hover:bg-base-200 border border-base-300/50 hover:border-primary/40 rounded-lg cursor-pointer transition-all active:bg-base-300"
                 @click="injectPreset(item)"
               >
-                <div class="flex justify-between items-start">
-                  <span class="text-xs font-bold truncate group-hover:text-primary transition-colors">{{ item.name }}</span>
-                  <ArrowUpRightIcon :size="12" class="opacity-0 group-hover:opacity-40 transition-opacity" />
+                <!-- Info Section -->
+                <div class="flex flex-col flex-1 min-w-0">
+                  <div class="flex items-center gap-2">
+                    <span class="text-[11px] font-bold text-primary/90 group-hover:text-primary transition-colors">{{ item.name }}</span>
+                    <span class="badge badge-ghost badge-xs font-mono opacity-40 text-[8px]">{{ item.hex.split(' ')[0] }}</span>
+                  </div>
+                  <div class="text-[10px] opacity-50 line-clamp-1 italic">{{ item.desc }}</div>
                 </div>
-                <span class="text-[10px] opacity-40 line-clamp-1 italic">{{ item.desc }}</span>
-                <div class="mt-1.5 font-mono text-[9px] opacity-30 group-hover:opacity-100 transition-opacity truncate bg-black/20 px-1.5 py-0.5 rounded">
-                  {{ item.hex }}
+
+                <!-- Hex Preview / Value Section -->
+                <div class="hidden sm:flex items-center gap-2">
+                  <div class="font-mono text-[10px] opacity-30 group-hover:opacity-100 transition-opacity bg-black/30 px-2 py-0.5 rounded border border-white/5">
+                    {{ item.hex }}
+                  </div>
+                </div>
+
+                <!-- Load Action -->
+                <div class="shrink-0">
+                  <button class="btn btn-ghost btn-xs gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <ArrowUpRightIcon :size="10" />
+                    <span class="text-[9px]">LOAD</span>
+                  </button>
                 </div>
               </div>
             </div>
@@ -202,7 +217,7 @@
       </section>
 
       <!-- Right: Monitor Panel -->
-      <aside class="w-96 flex flex-col gap-2">
+      <aside class="flex-1 flex flex-col gap-2 min-w-0">
         <div class="card bg-base-100 shadow-xl border border-base-200 flex-1 overflow-hidden flex flex-col">
           <div class="tabs tabs-boxed bg-base-200/50 rounded-none border-b border-base-200 p-1">
             <button 
