@@ -9,7 +9,7 @@ from loguru import logger
 from service.logs import setup_logging
 from service.hardware import hw
 
-from api import hardware, command, logs
+from api import hardware, command, logs, presets
 
 # 初始化日志
 setup_logging()
@@ -35,6 +35,7 @@ app.add_middleware(
 app.include_router(hardware.router)
 app.include_router(command.router)
 app.include_router(logs.router)
+app.include_router(presets.router)
 
 # 挂载前端静态文件 (生产模式)
 dist_path = os.path.join(os.path.dirname(__file__), "../frontend/dist")

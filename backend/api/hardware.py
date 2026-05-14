@@ -40,3 +40,19 @@ async def get_options():
         "readers": hw.get_supported_readers(),
         "baudrates": [9600, 115200, 1000000]
     }
+
+@router.get("/target")
+async def get_target():
+    """侦测卡片状态"""
+    target = hw.get_target()
+    return target if target else {"uid": None, "type": "No Target"}
+
+class ConfigRequest(BaseModel):
+    tx_crc: bool = True
+    rx_crc: bool = True
+
+@router.post("/config")
+async def update_config(req: ConfigRequest):
+    """更新硬件配置"""
+    hw.set_config(req.tx_crc, req.rx_crc)
+    return {"status": "ok"}

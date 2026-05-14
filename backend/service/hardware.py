@@ -75,4 +75,34 @@ class HardwareManager:
             self.port = ""
             logger.info("硬件已断开")
 
+    def get_target(self) -> Optional[dict]:
+        """侦测当前卡片"""
+        if not self.reader:
+            return None
+        try:
+            target = self.reader.find()
+            if target:
+                return {
+                    "uid": target["uid"].hex().upper(),
+                    "sak": hex(target["sak"]).upper(),
+                    "type": self._guess_card_type(target["sak"])
+                }
+        except Exception:
+            pass
+        return None
+
+    def set_config(self, tx_crc: bool, rx_crc: bool):
+        """配置硬件参数"""
+        if self.reader:
+            self.reader.set_crc(tx_crc, rx_crc)
+
+    def _guess_card_type(self, sak: int) -> str:
+        """根据 SAK 简单猜测卡片类型"""
+        if sak == 0x08: return "Mifare Classic 1K"
+        if sak == 0x18: return "Mifare Classic 4K"
+        if sak == 0x20: return "Mifare Desfire / JCOP"
+        if sak == 0x28: return "Mifare Classic 1K (Emulated)"
+        if sak == 0x00: return "Mifare Ultralight / NTAG"
+        return f"Unknown (SAK: {hex(sak)})"
+
 hw = HardwareManager()

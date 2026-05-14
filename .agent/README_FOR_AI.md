@@ -34,38 +34,48 @@
 
 ### 前端 (Frontend Implementation)
 - **响应式状态**:
-  - `logs`: 响应式数组，存储最近 1000 条日志，超限自动 `shift`。
-  - `activeFilters`: 日志级别动态过滤数组。
-  - `config`: 包含 `port`, `baudrate`, `reader_type` 的响应式对象。
+  - `logs`: 响应式数组，存储最近 1000 条日志。
+  - `history`: 记录已发送的高层指令及响应。
+  - `txCrc`, `rxCrc`: 独立控制发送与接收的 CRC 校验。
 - **实时通信**:
-  - `connectWS()`: 实现 WebSocket 自动重连机制（2秒间隔）。
-  - `checkStatus()`: 每 3 秒轮询后端同步硬件连接状态。
-  - `fetchOptions()`: 初始化时获取后端支持的串口和波特率列表。
+  - `checkStatus()`: 每 3 秒轮询同步。
+  - `fetchTarget()`: 侦测卡片 UID 和 SAK。支持手动 SCAN 和 AUTO 轮询模式。
 - **UI 布局**:
-  - **Sidebar**: 左侧提供硬件配置面板（串口、波特率、读卡器选择）及 **Favorites** 快速指令列表。
-  - **Main Console**: 右侧上方为实时日志流，采用 `mockup-code` 风格并支持级别过滤。
-  - **Transceive Debugger**: 右侧下方为指令发送区，支持十六进制透传，并折叠显示最后一次响应。
+  - **Workbench Layout**: 三栏式工作台设计。
+  - **Control Panel**: 包含硬件配置、串口刷新按钮及卡片上下文侦测。
+  - **Instruction Commander**: 提供 NTAG 等高层协议指令库，支持指令注入与透传调试。
+  - **Monitor**: 日志与历史记录。
 
 ---
 
 ## API 接口参考 (API Reference)
 
 ### 硬件控制 (Hardware)
-- `GET /api/hardware/options`: 获取可用连接选项。
+- `GET /api/hardware/options`: 获取可用串口、读卡器及波特率。
   - **返回**: `{"ports": ["COM1", ...], "readers": ["PN532_HSU"], "baudrates": [9600, ...]}`
 - `GET /api/hardware/status`: 获取当前硬件连接状态。
   - **返回**: `{"connected": true, "port": "COM3", "baudrate": 115200}`
+- `GET /api/hardware/target`: 侦测当前场内卡片信息。
+  - **返回**: `{"uid": "04A1B2C3", "sak": "0x08", "type": "Mifare Classic 1K"}`
 - `POST /api/hardware/connect`: 连接硬件设备。
   - **请求体**: `{"port": "COM3", "baudrate": 115200, "reader_type": "PN532_HSU"}`
 - `POST /api/hardware/disconnect`: 断开硬件连接。
+- `POST /api/hardware/config`: 更新硬件参数（独立控制 TX/RX CRC）。
+  - **请求体**: `{"tx_crc": true, "rx_crc": true}`
 
 ### 指令透传 (Command)
-- `POST /api/cmd/transceive`: 发送透传十六进制指令。
-  - **请求体**: `{"hex": "..."}`
-  - **返回**: `{"response": "..."}`
+- `POST /api/cmd/transceive`: 发送高层协议指令（Raw Card Command）。
+  - **请求体**: `{"hex": "30 04"}` (不再需要 PN532 帧封装)
+  - **返回**: `{"response": "A1 B2 C3 ..."}`
+
+### 指令预设 (Presets)
+- `GET /api/presets`: 获取所有卡种分类列表。
+  - **返回**: `["NTAG", ...]`
+- `GET /api/presets/{category}`: 获取指定分类下的指令模版。
+  - **返回**: `[{"name": "...", "hex": "...", "desc": "..."}]`
 
 ### 日志流 (Logs)
-- `WS /ws/logs`: 建立 WebSocket 连接接收实时日志。
+- `WS /ws/logs`: 建立 WebSocket 连接接收实时日志流。
   - **消息格式**: `{"level": "DEBUG", "message": "...", "timestamp": "..."}`
 
 ---
