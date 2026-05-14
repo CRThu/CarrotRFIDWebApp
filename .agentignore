@@ -1,0 +1,16 @@
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project
+node_modules/
+dist/
+__pycache__/
+*.pyc
+.venv/
+.uv/
+.env
