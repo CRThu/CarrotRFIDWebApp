@@ -47,13 +47,13 @@ class HardwareManager:
         self.reader: Optional[PN532_HSU] = None
         self.lock = asyncio.Lock()
 
-    def init_reader(self, port: str = "COM3"):
+    def init_reader(self, port: str = "COM20"):
         """初始化串口读取器"""
         try:
             logger.info(f"正在初始化 PN532 串口: {port}")
             self.reader = PN532_HSU(port)
             # 简单自检
-            self.reader.get_firmware_version()
+            self.reader.get_version()
             logger.info("硬件初始化成功")
         except Exception as e:
             logger.error(f"硬件初始化失败: {e}")
@@ -65,7 +65,7 @@ hw = HardwareManager()
 async def lifespan(app: FastAPI):
     # 启动时初始化硬件
     # 注意：这里的端口应根据实际情况配置，或通过环境变量传入
-    hw.init_reader("COM3") 
+    hw.init_reader("COM20") 
     yield
     # 关机清理
     if hw.reader:

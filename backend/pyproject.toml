@@ -1,7 +1,7 @@
 [project]
 name = "carrotrfidwebapp"
 version = "0.1.0"
-description = "Carrot RFID Web App Sidecar Console"
+description = "Carrot RFID Web App"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
@@ -9,7 +9,7 @@ dependencies = [
     "fastapi",
     "loguru",
     "pyserial",
-    "uvicorn",
+    "uvicorn[standard]",
 ]
 
 [tool.uv.sources]
