@@ -226,7 +226,7 @@
             <div class="p-2 border-b border-base-200 flex justify-between items-center px-4">
               <div class="flex gap-1">
                 <button 
-                  v-for="lvl in ['DEBUG', 'INFO', 'WARN', 'ERROR']" 
+                  v-for="lvl in ['DRIVER', 'PROTOCOL', 'DEBUG', 'INFO', 'WARN', 'ERROR']" 
                   :key="lvl"
                   class="btn btn-[8px] btn-ghost px-2 h-5 min-h-0 text-[8px]"
                   :class="activeFilters.includes(lvl) ? levelClass(lvl) : 'opacity-40'"
@@ -304,7 +304,7 @@ const cmdHex = ref('')
 const loading = reactive({ connect: false, send: false })
 const logs = ref([])
 const history = ref([])
-const activeFilters = ref(['DEBUG', 'INFO', 'WARN', 'ERROR'])
+const activeFilters = ref(['DRIVER', 'PROTOCOL', 'DEBUG', 'INFO', 'WARN', 'ERROR'])
 const logViewport = ref(null)
 const monitorTab = ref('logs')
 const autoScan = ref(false)
@@ -454,6 +454,8 @@ const levelClass = (l: string) => {
     case 'ERROR': return 'text-error font-bold'
     case 'WARN': return 'text-warning font-bold'
     case 'INFO': return 'text-info font-bold'
+    case 'DRIVER': return 'text-secondary font-bold'
+    case 'PROTOCOL': return 'text-primary font-bold'
     default: return 'text-neutral-content'
   }
 }
@@ -463,6 +465,8 @@ const levelTextClass = (l: string) => {
     case 'ERROR': return 'text-error'
     case 'WARN': return 'text-warning'
     case 'INFO': return 'text-info'
+    case 'DRIVER': return 'text-secondary'
+    case 'PROTOCOL': return 'text-primary'
     default: return 'text-neutral-content opacity-70'
   }
 }

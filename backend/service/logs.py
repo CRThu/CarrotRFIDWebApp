@@ -1,7 +1,8 @@
 import asyncio
 import json
-from loguru import logger
 import sys
+from loguru import logger
+from crft.trace.manager import trace
 
 class LogQueue:
     """日志队列，用于将日志转发至 WebSocket"""
@@ -16,8 +17,17 @@ class LogQueue:
 
     def __call__(self, message):
         record = message.record
+        level = record["level"].name
+        
+        # 映射 WARNING 为 WARN，兼容前端过滤器
+        if level == "WARNING":
+            level = "WARN"
+            
+        # 提取层级信息 (DRIVER/PROTOCOL)
+        layer = record["extra"].get("layer")
+        
         log_entry = {
-            "level": record["level"].name,
+            "level": layer if layer else level,
             "message": record["message"],
             "timestamp": record["time"].isoformat(),
         }
@@ -27,6 +37,14 @@ class LogQueue:
 log_queue = LogQueue()
 
 def setup_logging():
-    logger.remove()
-    logger.add(sys.stderr, level="DEBUG")
-    logger.add(log_queue, level="DEBUG", serialize=False)
+    # 使用 trace 管理器统一配置，避免重复调用 logger.remove() 冲突
+    # trace.set_level 会调用 _reconfigure()，其中包含 logger.remove()
+    trace.set_level("DEBUG")
+    
+    # 在 trace 配置的基础上，添加 WebSocket 转发队列
+    # 使用 trace._filter 以确保层级开关（DRIVER/PROTOCOL）生效
+    logger.add(log_queue, level="TRACE", filter=trace._filter, serialize=False)
+    
+    # 默认开启详细追踪（可选，根据用户需求）
+    trace.set_layer("DRIVER", True)
+    trace.set_layer("PROTOCOL", True)
