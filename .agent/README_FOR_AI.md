@@ -46,6 +46,28 @@
 
 ---
 
+## API 接口参考 (API Reference)
+
+### 硬件控制 (Hardware)
+- `GET /api/hardware/options`: 获取可用连接选项。
+  - **返回**: `{"ports": ["COM1", ...], "readers": ["PN532_HSU"], "baudrates": [9600, ...]}`
+- `GET /api/hardware/status`: 获取当前硬件连接状态。
+  - **返回**: `{"connected": true, "port": "COM3", "baudrate": 115200}`
+- `POST /api/hardware/connect`: 连接硬件设备。
+  - **请求体**: `{"port": "COM3", "baudrate": 115200, "reader_type": "PN532_HSU"}`
+- `POST /api/hardware/disconnect`: 断开硬件连接。
+
+### 指令透传 (Command)
+- `POST /api/cmd/transceive`: 发送透传十六进制指令。
+  - **请求体**: `{"hex": "..."}`
+  - **返回**: `{"response": "..."}`
+
+### 日志流 (Logs)
+- `WS /ws/logs`: 建立 WebSocket 连接接收实时日志。
+  - **消息格式**: `{"level": "DEBUG", "message": "...", "timestamp": "..."}`
+
+---
+
 ## 运行指南
 
 ### 后端 (Python/uv)

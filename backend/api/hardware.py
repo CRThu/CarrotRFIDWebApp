@@ -7,7 +7,7 @@ router = APIRouter(prefix="/api/hardware", tags=["Hardware"])
 class ConnectRequest(BaseModel):
     port: str = Field(..., description="串口号")
     baudrate: int = Field(115200, description="波特率")
-    reader_type: str = Field("pn532", description="读卡器类型")
+    reader_type: str = Field("PN532_HSU", description="读卡器类型")
 
 @router.post("/connect")
 async def connect_hardware(req: ConnectRequest):
@@ -30,4 +30,13 @@ async def get_status():
         "connected": hw.reader is not None,
         "port": hw.port,
         "baudrate": hw.baudrate
+    }
+
+@router.get("/options")
+async def get_options():
+    """获取连接选项（可用串口、支持的读卡器）"""
+    return {
+        "ports": hw.get_available_ports(),
+        "readers": hw.get_supported_readers(),
+        "baudrates": [9600, 115200, 1000000]
     }
