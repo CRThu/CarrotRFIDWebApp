@@ -28,7 +28,7 @@
     - `logs.py`: 提供 `/ws/logs` 实时日志推送。
   - **`service` 层**: 核心业务与硬件控制。
     - `hardware.py`: `HardwareManager` 硬件管理单例，控制 `SerialTransport` 与 `PN532_HSU` 的生命周期，确保 Web 端并发指令时的原子性。
-    - `logs.py`: 日志队列管道，集成 loguru 转发前端。
+    - `logs.py`: 日志队列管道，集成 `loguru` 并接入 `crft.trace.manager` 实现层级化日志（DRIVER/PROTOCOL）转发。
 - **动态控制**:
   - 不在 `lifespan` 内硬编码连接逻辑，完全由客户端发起 `connect` 控制，支持从前端自由选择波特率和读卡器。
 
@@ -44,7 +44,7 @@
   - **Workbench Layout**: 三栏式工作台设计。
   - **Control Panel**: 包含硬件配置、串口刷新按钮及卡片上下文侦测。
   - **Instruction Commander**: 提供 NTAG 等高层协议指令库，支持指令注入与透传调试。
-  - **Monitor**: 日志与历史记录。
+  - **Monitor**: 日志与历史记录，支持对 `DRIVER` 和 `PROTOCOL` 层级进行实时过滤和颜色高亮。
 
 ---
 
@@ -76,7 +76,8 @@
 
 ### 日志流 (Logs)
 - `WS /ws/logs`: 建立 WebSocket 连接接收实时日志流。
-  - **消息格式**: `{"level": "DEBUG", "message": "...", "timestamp": "..."}`
+  - **消息格式**: `{"level": "INFO|WARN|ERROR|DEBUG|DRIVER|PROTOCOL", "message": "...", "timestamp": "..."}`
+  - **注意**: `WARNING` 级别会自动映射为 `WARN` 以兼容前端。
 
 ---
 
@@ -101,4 +102,4 @@ bun run dev --port 3000
 1. **指令安全**: 新增任何硬件交互接口，必须使用 Pydantic 进行输入验证。
 2. **UI 规范**: 优先使用 DaisyUI 现成组件，保持深色模式风格一致（`data-theme="dark"`）。
 3. **隔离性**: 严禁在本项目中修改 `../../CarrotRFIDTester` 目录下的代码，所有逻辑应在 `backend/main.py` 中通过核心库 API 实现。
-4. **日志规范**: 前端根据日志内容中的 `[Web]` 标签可识别出哪些操作源自 Web 端。
+4. **日志规范**: 接入 `crft.trace` 架构，核心驱动和协议层日志应分别标记为 `DRIVER` 和 `PROTOCOL` 级别，前端通过过滤开关控制显示。
