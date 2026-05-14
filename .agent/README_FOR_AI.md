@@ -34,15 +34,17 @@
 
 ### 前端 (Frontend Implementation)
 - **响应式状态**:
-  - `logs`: 响应式数组，存储最近 500 条日志，超限自动 `shift`。
+  - `logs`: 响应式数组，存储最近 1000 条日志，超限自动 `shift`。
   - `activeFilters`: 日志级别动态过滤数组。
+  - `config`: 包含 `port`, `baudrate`, `reader_type` 的响应式对象。
 - **实时通信**:
   - `connectWS()`: 实现 WebSocket 自动重连机制（2秒间隔）。
-  - `checkStatus()`: 每 5 秒轮询后端同步硬件连接状态。
+  - `checkStatus()`: 每 3 秒轮询后端同步硬件连接状态。
+  - `fetchOptions()`: 初始化时获取后端支持的串口和波特率列表。
 - **UI 布局**:
-  - **Header**: 包含动态渐变标题和连接状态 Stats 指示器。
-  - **Console**: 采用 `mockup-code` 风格，各级别日志（DEBUG/INFO/WARN/ERROR）通过 Tailwind 类实现不同配色。
-  - **Command**: 组合式输入框，支持 `Enter` 快捷发送。
+  - **Sidebar**: 左侧提供硬件配置面板（串口、波特率、读卡器选择）及 **Favorites** 快速指令列表。
+  - **Main Console**: 右侧上方为实时日志流，采用 `mockup-code` 风格并支持级别过滤。
+  - **Transceive Debugger**: 右侧下方为指令发送区，支持十六进制透传，并折叠显示最后一次响应。
 
 ---
 
