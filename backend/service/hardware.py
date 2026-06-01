@@ -106,6 +106,15 @@ class HardwareManager:
                 logger.error(f"设置 RF 场失败: {e}")
         return False
 
+    def get_rf_field_status(self) -> bool:
+        """获取 RF 场物理状态"""
+        if self.reader:
+            try:
+                return self.reader.get_rf_field()
+            except Exception as e:
+                logger.error(f"读取 RF 场状态失败: {e}")
+        return False
+
     def _guess_card_type(self, sak: int) -> str:
         """根据 SAK 简单猜测卡片类型"""
         if sak == 0x08: return "Mifare Classic 1K"

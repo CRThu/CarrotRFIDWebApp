@@ -57,6 +57,11 @@ async def update_config(req: ConfigRequest):
     hw.set_config(req.tx_crc, req.rx_crc)
     return {"status": "ok"}
 
+@router.get("/rf-field")
+async def get_rf_field():
+    """获取 RF 场物理状态"""
+    return {"enabled": hw.get_rf_field_status()}
+
 class RFFieldRequest(BaseModel):
     enabled: bool = Field(..., description="是否开启 RF 场")
 

@@ -71,11 +71,26 @@
             >
               DISCONNECT
             </button>
+
+            <!-- RF Field Status & Control -->
+            <div class="bg-base-200 p-3 rounded-lg space-y-2 border border-base-300 mt-2 transition-opacity" :class="!isConnected ? 'opacity-30' : 'opacity-100'">
+              <div class="flex items-center justify-between">
+                <span class="text-[10px] font-bold opacity-50 uppercase tracking-wider">RF Field</span>
+                <div class="flex items-center gap-2">
+                  <div class="w-2 h-2 rounded-full" :class="isConnected && rfField ? 'bg-success shadow-[0_0_8px_#36d399]' : 'bg-base-300'"></div>
+                  <span class="text-[10px] font-mono font-bold">{{ rfField ? 'ON' : 'OFF' }}</span>
+                </div>
+              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <button class="btn btn-xs" :class="rfField ? 'btn-secondary' : 'btn-ghost'" @click="toggleRfField(true)" :disabled="!isConnected">ON</button>
+                <button class="btn btn-xs" :class="!rfField ? 'btn-error' : 'btn-ghost'" @click="toggleRfField(false)" :disabled="!isConnected">OFF</button>
+              </div>
+            </div>
           </div>
         </section>
 
         <!-- 2. Target Context -->
-        <section class="card bg-base-100 shadow-xl border border-base-200 overflow-hidden flex-1">
+        <section class="card bg-base-100 shadow-xl border border-base-200 overflow-hidden shrink-0">
           <div class="p-4 border-b border-base-200 bg-base-200/50 flex items-center justify-between">
             <div class="flex items-center gap-2">
               <ScanIcon :size="16" class="text-secondary" />
@@ -84,36 +99,22 @@
           </div>
           <div class="p-4 flex flex-col items-center gap-2">
             <div class="relative">
-              <div class="w-20 h-20 rounded-full border-4 flex items-center justify-center transition-all duration-500"
+              <div class="w-16 h-16 rounded-full border-4 flex items-center justify-center transition-all duration-500"
                    :class="target.uid ? 'border-success bg-success/5 shadow-[0_0_20px_rgba(54,211,153,0.2)]' : 'border-base-300 opacity-20'">
-                <CreditCardIcon :size="32" :class="target.uid ? 'text-success' : 'text-base-content'" />
+                <CreditCardIcon :size="24" :class="target.uid ? 'text-success' : 'text-base-content'" />
               </div>
-              <div v-if="target.uid" class="absolute -bottom-1 -right-1 badge badge-success badge-sm shadow-md border-base-100">DETECTED</div>
             </div>
             
-            <div class="w-full space-y-4 pt-2">
-              <div class="text-center">
-                <div class="text-[10px] font-bold opacity-30 uppercase tracking-widest mb-1">Card Type</div>
-                <div class="text-sm font-semibold truncate">{{ target.type || 'N/A' }}</div>
-              </div>
-              <div class="divider my-0 opacity-20"></div>
-              <div class="space-y-3">
-                <div class="flex justify-between items-center">
-                  <span class="text-[10px] font-bold opacity-40">UID</span>
-                  <span class="font-mono text-xs font-bold text-secondary">{{ target.uid || '---- ----' }}</span>
-                </div>
-                <div class="flex justify-between items-center">
-                  <span class="text-[10px] font-bold opacity-40">SAK</span>
-                  <span class="font-mono text-xs">{{ target.sak || '00' }}</span>
-                </div>
+            <div class="w-full space-y-2 pt-1">
+              <div class="flex justify-between text-[10px] opacity-70">
+                <span>{{ target.type || 'No Target' }}</span>
+                <span class="font-mono text-secondary">{{ target.uid || '----' }}</span>
               </div>
             </div>
           </div>
-          <div class="mt-auto p-4 bg-base-200/30 border-t border-base-200 grid grid-cols-2 gap-2">
-            <button class="btn btn-secondary btn-sm" :disabled="!isConnected" @click="fetchTarget">
-              <SearchIcon :size="14" class="mr-1" /> SCAN
-            </button>
-            <button class="btn btn-sm" :class="autoScan ? 'btn-error' : 'btn-outline'" :disabled="!isConnected" @click="autoScan = !autoScan">
+          <div class="p-2 bg-base-200/30 border-t border-base-200 grid grid-cols-2 gap-2">
+            <button class="btn btn-secondary btn-xs" :disabled="!isConnected" @click="fetchTarget">SCAN</button>
+            <button class="btn btn-xs" :class="autoScan ? 'btn-error' : 'btn-outline'" :disabled="!isConnected" @click="autoScan = !autoScan">
               {{ autoScan ? 'STOP' : 'AUTO' }}
             </button>
           </div>
@@ -185,10 +186,6 @@
                 <label class="flex items-center gap-2 cursor-pointer group">
                   <span class="text-[10px] font-bold opacity-40 group-hover:opacity-100 transition-opacity">RX CRC</span>
                   <input type="checkbox" v-model="rxCrc" class="toggle toggle-primary toggle-xs" @change="updateConfig" />
-                </label>
-                <label class="flex items-center gap-2 cursor-pointer group">
-                  <span class="text-[10px] font-bold opacity-40 group-hover:opacity-100 transition-opacity">RF FIELD</span>
-                  <input type="checkbox" :checked="rfField" class="toggle toggle-secondary toggle-xs" @change="toggleRfField" />
                 </label>
                 <button class="btn btn-ghost btn-xs ml-2" @click="cmdHex = ''">CLEAR</button>
               </div>
@@ -393,14 +390,25 @@ const checkStatus = async () => {
   } catch (e) { isConnected.value = false }
 }
 
-const toggleRfField = async () => {
+const fetchRfFieldStatus = async () => {
   if (!isConnected.value) return
-  rfField.value = !rfField.value
-  await fetch('/api/hardware/rf-field', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ enabled: rfField.value })
-  })
+  try {
+    const res = await fetch('/api/hardware/rf-field')
+    const data = await res.json()
+    rfField.value = data.enabled
+  } catch (e) {}
+}
+
+const toggleRfField = async (enabled: boolean) => {
+  if (!isConnected.value) return
+  try {
+    await fetch('/api/hardware/rf-field', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ enabled })
+    })
+    rfField.value = enabled
+  } catch (e) { alert('Failed to toggle RF field') }
 }
 
 const updateConfig = async () => {
@@ -526,6 +534,7 @@ onMounted(() => {
   fetchCategories()
   checkStatus()
   setInterval(checkStatus, 3000)
+  setInterval(fetchRfFieldStatus, 2000)
   
   // Auto scan interval
   setInterval(() => {
