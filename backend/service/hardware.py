@@ -96,6 +96,16 @@ class HardwareManager:
         if self.reader:
             self.reader.set_crc(tx_crc, rx_crc)
 
+    def set_rf_field(self, enabled: bool) -> bool:
+        """手动开关 RF 场"""
+        if self.reader:
+            try:
+                self.reader.set_rf_field(enabled)
+                return True
+            except Exception as e:
+                logger.error(f"设置 RF 场失败: {e}")
+        return False
+
     def _guess_card_type(self, sak: int) -> str:
         """根据 SAK 简单猜测卡片类型"""
         if sak == 0x08: return "Mifare Classic 1K"

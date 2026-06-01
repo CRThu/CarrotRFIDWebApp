@@ -56,3 +56,13 @@ async def update_config(req: ConfigRequest):
     """更新硬件配置"""
     hw.set_config(req.tx_crc, req.rx_crc)
     return {"status": "ok"}
+
+class RFFieldRequest(BaseModel):
+    enabled: bool = Field(..., description="是否开启 RF 场")
+
+@router.post("/rf-field")
+async def toggle_rf_field(req: RFFieldRequest):
+    """手动控制 RF 场（调试用）"""
+    if not hw.set_rf_field(req.enabled):
+        raise HTTPException(status_code=400, detail="无法设置 RF 场，请检查硬件连接")
+    return {"status": "ok", "enabled": req.enabled}

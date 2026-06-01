@@ -186,6 +186,10 @@
                   <span class="text-[10px] font-bold opacity-40 group-hover:opacity-100 transition-opacity">RX CRC</span>
                   <input type="checkbox" v-model="rxCrc" class="toggle toggle-primary toggle-xs" @change="updateConfig" />
                 </label>
+                <label class="flex items-center gap-2 cursor-pointer group">
+                  <span class="text-[10px] font-bold opacity-40 group-hover:opacity-100 transition-opacity">RF FIELD</span>
+                  <input type="checkbox" :checked="rfField" class="toggle toggle-secondary toggle-xs" @change="toggleRfField" />
+                </label>
                 <button class="btn btn-ghost btn-xs ml-2" @click="cmdHex = ''">CLEAR</button>
               </div>
             </div>
@@ -325,6 +329,7 @@ const monitorTab = ref('logs')
 const autoScan = ref(false)
 const txCrc = ref(true)
 const rxCrc = ref(true)
+const rfField = ref(true)
 
 const options = reactive({ ports: [], readers: [], baudrates: [] })
 const config = reactive({ port: '', baudrate: 115200, reader_type: 'PN532_HSU' })
@@ -386,6 +391,16 @@ const checkStatus = async () => {
       config.baudrate = data.baudrate
     }
   } catch (e) { isConnected.value = false }
+}
+
+const toggleRfField = async () => {
+  if (!isConnected.value) return
+  rfField.value = !rfField.value
+  await fetch('/api/hardware/rf-field', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ enabled: rfField.value })
+  })
 }
 
 const updateConfig = async () => {
