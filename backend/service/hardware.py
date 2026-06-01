@@ -96,6 +96,14 @@ class HardwareManager:
         if self.reader:
             self.reader.set_crc(tx_crc, rx_crc)
 
+    def transceive(self, data: bytes, tx_last_bits: int = 0) -> tuple[bytes, int]:
+        """执行指令交换并返回数据与最后接收位数"""
+        if not self.reader:
+            raise Exception("硬件未连接")
+        
+        response = self.reader.transceive(data, last_tx_bits=tx_last_bits)
+        return response, self.reader.last_rx_bits
+
     def set_rf_field(self, enabled: bool) -> bool:
         """手动开关 RF 场"""
         if self.reader:

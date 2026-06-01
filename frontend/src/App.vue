@@ -196,11 +196,14 @@
                 <div class="relative group">
                   <textarea 
                     v-model="cmdHex" 
-                    placeholder="Enter High-Level Hex Command (e.g. 30 04)" 
+                    placeholder="Enter Hex Command (e.g. 30 04, or AA BB 7'h26 for bit-level)" 
                     class="textarea textarea-bordered w-full font-mono text-xs leading-relaxed bg-neutral h-20 focus:border-primary transition-colors shadow-inner no-scrollbar"
                     @keydown.ctrl.enter="sendCmd"
                   ></textarea>
-                  <div class="absolute bottom-2 right-2 text-[10px] opacity-20 pointer-events-none group-hover:opacity-40 transition-opacity">Ctrl + Enter to send</div>
+                  <div class="absolute bottom-2 right-2 flex items-center gap-2 text-[10px] opacity-20 pointer-events-none group-hover:opacity-40 transition-opacity">
+                    <span v-if="detectBits(cmdHex)" class="badge badge-xs badge-warning">BITS</span>
+                    <span>Ctrl + Enter to send</span>
+                  </div>
                 </div>
               </div>
               <button 
@@ -275,9 +278,13 @@
                 <span class="text-[9px] font-mono opacity-40">{{ formatTime(item.timestamp) }}</span>
                 <span class="badge badge-ghost badge-xs text-[8px] opacity-0 group-hover:opacity-100 transition-opacity">RESTORE</span>
               </div>
-              <div class="font-mono text-[10px] break-all group-hover:text-primary transition-colors">{{ item.hex }}</div>
-              <div v-if="item.response" class="mt-1 pt-1 border-t border-base-200 text-[9px] text-success font-mono truncate">
-                ← {{ item.response }}
+              <div class="font-mono text-[10px] break-all group-hover:text-primary transition-colors">
+                {{ item.hex }}
+                <span v-if="item.tx_last_bits > 0" class="badge badge-xs badge-warning ml-1">tx:{{ item.tx_last_bits }}bits</span>
+              </div>
+              <div v-if="item.response" class="mt-1 pt-1 border-t border-base-200 flex items-center gap-1">
+                <span class="text-[9px] text-success font-mono break-all">← {{ item.response_formatted || item.response }}</span>
+                <span v-if="item.rx_last_bits > 0" class="badge badge-xs badge-info">rx:{{ item.rx_last_bits }}bits</span>
               </div>
             </div>
             <div v-if="history.length === 0" class="text-center opacity-20 mt-20 text-xs italic">NO RECENT COMMANDS</div>
@@ -311,6 +318,7 @@ import {
   RotateCcw as RotateCcwIcon,
   ArrowUpRight as ArrowUpRightIcon,
   Activity as ActivityIcon,
+  Target as TargetIcon,
   Search as SearchIcon
 } from 'lucide-vue-next'
 
@@ -459,6 +467,9 @@ const sendCmd = async () => {
       history.value.unshift({ 
         hex: cmdHex.value, 
         response: data.response, 
+        response_formatted: data.response_formatted || data.response,
+        rx_last_bits: data.rx_last_bits || 0,
+        tx_last_bits: data.tx_last_bits || 0,
         timestamp: new Date().toISOString() 
       })
       if (history.value.length > 50) history.value.pop()
@@ -477,6 +488,10 @@ const injectPreset = (item: any) => {
 const toggleFilter = (l: string) => {
   const i = activeFilters.value.indexOf(l)
   i > -1 ? activeFilters.value.splice(i, 1) : activeFilters.value.push(l)
+}
+
+const detectBits = (text: string) => {
+  return text.includes("'h")
 }
 
 const clearLogs = () => logs.value = []
