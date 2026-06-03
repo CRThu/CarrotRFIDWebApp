@@ -255,6 +255,10 @@
                 </button>
               </div>
               <button class="btn btn-ghost btn-xs text-[10px]" @click="clearLogs">CLEAR</button>
+              <label class="flex items-center gap-1 cursor-pointer">
+                <input type="checkbox" v-model="autoScroll" class="checkbox checkbox-xs" />
+                <span class="text-[10px] opacity-70">Auto-Scroll</span>
+              </label>
             </div>
             <div class="flex-1 overflow-y-auto p-3 font-mono bg-black/40 text-neutral-content rounded-none m-0 text-[10px] leading-relaxed scroll-smooth" ref="logViewport">
               <div v-for="(log, index) in filteredLogs" :key="index" :class="levelTextClass(log.level)" class="hover:bg-white/5 transition-colors cursor-default py-0.5 border-b border-white/5 last:border-0 flex gap-2">
@@ -332,6 +336,7 @@ const activeFilters = ref(['DRIVER', 'PROTOCOL', 'DEBUG', 'INFO', 'WARN', 'ERROR
 const logViewport = ref(null)
 const monitorTab = ref('logs')
 const autoScan = ref(false)
+const autoScroll = ref(true)
 const txCrc = ref(true)
 const rxCrc = ref(true)
 const rfField = ref(true)
@@ -527,10 +532,12 @@ const levelTextClass = (l: string) => {
 // --- Watchers ---
 watch(activeCategory, (newCat) => fetchPresets(newCat))
 
-watch(filteredLogs, () => {
-  nextTick(() => {
-    if (logViewport.value) logViewport.value.scrollTop = logViewport.value.scrollHeight
-  })
+watch(filteredLogs, (newVal, oldVal) => {
+  if (autoScroll.value && newVal.length > (oldVal?.length || 0)) {
+    nextTick(() => {
+      if (logViewport.value) logViewport.value.scrollTop = logViewport.value.scrollHeight
+    })
+  }
 }, { deep: true })
 
 // --- Lifecycle ---
