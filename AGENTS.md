@@ -1,7 +1,7 @@
 # CarrotRFIDWebApp (Sidecar Console)
 
 ## 项目概述
-本仓库是 `CarrotRFIDTester` 的**旁路可视化 Web 控制台**。它通过本地依赖引用主仓库库，提供硬件连接监控、工业级实时日志流可视化以及十六进制指令调试功能。
+本仓库是 `NfcTester` 的**旁路可视化 Web 控制台**。它通过本地依赖引用主仓库库，提供硬件连接监控、工业级实时日志流可视化以及十六进制指令调试功能。
 
 ## 技术栈选型及理由
 
@@ -28,7 +28,7 @@
     - `logs.py`: 提供 `/ws/logs` 实时日志推送。
   - **`service` 层**: 核心业务与硬件控制。
     - `hardware.py`: `HardwareManager` 硬件管理单例，控制 `SerialTransport` 与 `PN532_HSU` 的生命周期，确保 Web 端并发指令时的原子性。
-    - `logs.py`: 日志队列管道，集成 `loguru` 并接入 `crft.trace.manager` 实现层级化日志（DRIVER/PROTOCOL）转发。
+    - `logs.py`: 日志队列管道，集成 `loguru` 并接入 `nfctester.trace.manager` 实现层级化日志（DRIVER/PROTOCOL）转发。
 - **动态控制**:
   - 不在 `lifespan` 内硬编码连接逻辑，完全由客户端发起 `connect` 控制，支持从前端自由选择波特率和读卡器。
 
@@ -101,5 +101,5 @@ bun run dev --port 3000
 ## AI 协助开发准则
 1. **指令安全**: 新增任何硬件交互接口，必须使用 Pydantic 进行输入验证。
 2. **UI 规范**: 优先使用 DaisyUI 现成组件，保持深色模式风格一致（`data-theme="dark"`）。
-3. **隔离性**: 严禁在本项目中修改 `../../CarrotRFIDTester` 目录下的代码，所有逻辑应在 `backend/main.py` 中通过核心库 API 实现。
-4. **日志规范**: 接入 `crft.trace` 架构，核心驱动和协议层日志应分别标记为 `DRIVER` 和 `PROTOCOL` 级别，前端通过过滤开关控制显示。
+3. **隔离性**: 严禁在本项目中修改 `../../NfcTester` 目录下的代码，所有逻辑应在 `backend/main.py` 中通过核心库 API 实现。
+4. **日志规范**: 接入 `nfctester.trace` 架构，核心驱动和协议层日志应分别标记为 `DRIVER` 和 `PROTOCOL` 级别，前端通过过滤开关控制显示。

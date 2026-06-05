@@ -2,7 +2,7 @@ import asyncio
 import json
 import sys
 from loguru import logger
-from crft.trace.manager import trace
+from nfctester.trace.manager import trace
 
 class LogQueue:
     """日志队列，用于将日志转发至 WebSocket"""

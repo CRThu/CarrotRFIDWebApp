@@ -3,8 +3,8 @@ from typing import Optional
 from loguru import logger
 
 # 引入核心库
-from crft.drivers.pn532_hsu import PN532_HSU
-from crft.hardware.serial_transport import SerialTransport
+from nfctester.drivers.pn532_hsu import PN532_HSU
+from nfctester.hardware.serial_transport import SerialTransport
 import serial.tools.list_ports
 
 class HardwareManager:
@@ -23,9 +23,9 @@ class HardwareManager:
 
     def get_supported_readers(self) -> list[str]:
         """获取支持的读卡器类型（从驱动包中动态查找）"""
-        import crft.drivers
+        import nfctester.drivers
         readers = []
-        for name in getattr(crft.drivers, "__all__", []):
+        for name in getattr(nfctester.drivers, "__all__", []):
             if name != "CardReader":
                 readers.append(name)
         return readers if readers else ["PN532_HSU"]
@@ -38,8 +38,8 @@ class HardwareManager:
             logger.info(f"正在初始化硬件 - 类型: {reader_type}, 串口: {port}, 波特率: {baudrate}")
             self.transport = SerialTransport(port=port, baudrate=baudrate)
             
-            import crft.drivers
-            reader_class = getattr(crft.drivers, reader_type, None)
+            import nfctester.drivers
+            reader_class = getattr(nfctester.drivers, reader_type, None)
             if not reader_class:
                 raise ValueError(f"不支持的读卡器类型: {reader_type}")
             
